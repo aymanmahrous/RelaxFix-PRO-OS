@@ -58,3 +58,4 @@ app.post("/api/ai", async (req, res) => {
 
     res.json({ reply });
 });
+
