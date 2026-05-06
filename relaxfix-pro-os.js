@@ -121,4 +121,31 @@ app.post("/api/order/complete", async (req, res) => {
 
     res.json({ success: true });
 });
+/* ============================================================
+   RELAXFIX PRO OS — PART 4/4
+   SERVER START + DEFAULT ROUTES + HEALTH CHECK
+============================================================ */
+
+/* ============================================================
+   HOME ROUTE
+============================================================ */
+app.get("/", (req, res) => {
+    res.send("RelaxFix PRO OS is running successfully.");
+});
+
+/* ============================================================
+   HEALTH CHECK
+============================================================ */
+app.get("/health", (req, res) => {
+    res.json({ status: "ok", time: new Date().toISOString() });
+});
+
+/* ============================================================
+   START SERVER
+============================================================ */
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log(`RelaxFix PRO OS running on port ${PORT}`);
+});
 
