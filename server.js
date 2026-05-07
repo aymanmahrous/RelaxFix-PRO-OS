@@ -5,10 +5,11 @@ import { fileURLToPath } from "url";
 const app = express();
 app.use(express.json());
 
-// تشغيل ملفات الواجهة
+// حل مشكلة المسارات في ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// تشغيل ملفات الواجهة من relaxfix-app
 app.use(express.static(path.join(__dirname, "relaxfix-app")));
 
 // تشغيل API
@@ -22,4 +23,6 @@ app.post("/api/update", update);
 
 // تشغيل السيرفر
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log("Server running on port", PORT));
+app.listen(PORT, () => {
+    console.log("🚀 Server running on port", PORT);
+});
