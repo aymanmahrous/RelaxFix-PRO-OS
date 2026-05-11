@@ -9,20 +9,9 @@ export default async function (req, res) {
         await telegram(orderData);
         await whatsapp(orderData);
 
-        // إرجاع استجابة ناجحة
-        res.status(200).json({ 
-            success: true, 
-            message: "Order processed and notifications sent!" 
-        });
-
+        res.status(200).json({ success: true, message: "تم استلام الطلب بنجاح" });
     } catch (error) {
-        // طباعة الخطأ في الـ Logs لمساعدتك في التتبع
-        console.error("Error in Order API:", error);
-        
-        res.status(500).json({ 
-            success: false, 
-            error: "Internal Server Error",
-            details: error.message 
-        });
+        console.error("Error:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
 }
