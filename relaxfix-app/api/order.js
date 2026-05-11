@@ -1,24 +1,40 @@
-import telegram from "./telegram.js"; // تم تعديل المسار لنقطة واحدة
-import whatsapp from "./whatsapp.js"; // تم تعديل المسار لنقطة واحدة
+import telegram from "./telegram.js"; 
+import whatsapp from "./whatsapp.js"; 
 
 export default async function (req, res) {
+    // التأكد من أن الطلب من نوع POST
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Method Not Allowed' });
+    }
+
     try {
         const orderData = req.body;
-        console.log("Receiving new order:", orderData);
 
-        // إرسال الإشعارات
-        if (telegram) await telegram(orderData);
-        // if (whatsapp) await whatsapp(orderData); // فك التعليق إذا كان مفعلًا
+        // تنفيذ إرسال التليجرام
+        // ملاحظة: تأكد أن ملف telegram.js يصدر دالة (Function)
+        if (typeof telegram === 'function') {
+            await telegram(orderData);
+        } else {
+            console.error("Telegram module is not a function");
+        }
 
+        // تنفيذ إرسال الواتساب
+        if (typeof whatsapp === 'function') {
+            await whatsapp(orderData);
+        }
+
+        // إرسال رد النجاح
         res.status(200).json({ 
             success: true, 
-            message: "Order processed successfully" 
+            message: "تم استلام الطلب بنجاح وإرسال الإشعارات" 
         });
+
     } catch (error) {
-        console.error("Order API Error:", error);
+        console.error("Error in Order API:", error);
         res.status(500).json({ 
             success: false, 
-            error: "Failed to process order" 
+            error: "فشل في معالجة الطلب",
+            details: error.message 
         });
     }
 }
