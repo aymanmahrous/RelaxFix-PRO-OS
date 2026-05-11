@@ -1,35 +1,24 @@
-import telegram from "./telegram.js"; 
-import whatsapp from "./whatsapp.js"; 
-
-// تأكد أنك قمت بتعريف الـ Client الخاص بـ Supabase هنا إذا كنت تستخدمه
-// أو قم باستيراده إذا كان في ملف منفصل
+import telegram from "./telegram.js"; // تم تعديل المسار لنقطة واحدة
+import whatsapp from "./whatsapp.js"; // تم تعديل المسار لنقطة واحدة
 
 export default async function (req, res) {
     try {
         const orderData = req.body;
+        console.log("Receiving new order:", orderData);
 
-        // تنفيذ إرسال التليجرام
-        if (telegram) {
-            await telegram(orderData);
-        }
+        // إرسال الإشعارات
+        if (telegram) await telegram(orderData);
+        // if (whatsapp) await whatsapp(orderData); // فك التعليق إذا كان مفعلًا
 
-        // تنفيذ إرسال الواتساب (اختياري)
-        if (whatsapp) {
-            await whatsapp(orderData);
-        }
-
-        // إرسال رد النجاح للمتصفح
         res.status(200).json({ 
             success: true, 
-            message: "Order processed and notifications sent!" 
+            message: "Order processed successfully" 
         });
-
     } catch (error) {
-        console.error("Error in Order API:", error);
+        console.error("Order API Error:", error);
         res.status(500).json({ 
             success: false, 
-            error: "Internal Server Error" 
+            error: "Failed to process order" 
         });
     }
 }
-
