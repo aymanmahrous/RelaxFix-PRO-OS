@@ -1,40 +1,34 @@
 import telegram from "./telegram.js"; 
 import whatsapp from "./whatsapp.js"; 
 
+// دالة معالجة الطلبات
 export default async function (req, res) {
-    // التأكد من أن الطلب من نوع POST
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Method Not Allowed' });
-    }
-
     try {
+        // استقبال بيانات الطلب من المتصفح
         const orderData = req.body;
 
-        // تنفيذ إرسال التليجرام
-        // ملاحظة: تأكد أن ملف telegram.js يصدر دالة (Function)
-        if (typeof telegram === 'function') {
+        // 1. إرسال البيانات إلى تليجرام
+        if (telegram) {
             await telegram(orderData);
-        } else {
-            console.error("Telegram module is not a function");
         }
 
-        // تنفيذ إرسال الواتساب
-        if (typeof whatsapp === 'function') {
+        // 2. إرسال البيانات إلى واتساب (اختياري)
+        if (whatsapp) {
             await whatsapp(orderData);
         }
 
-        // إرسال رد النجاح
+        // إرسال رد نجاح للواجهة الأمامية
         res.status(200).json({ 
             success: true, 
-            message: "تم استلام الطلب بنجاح وإرسال الإشعارات" 
+            message: "تم استلام الطلب وإرسال الإشعارات بنجاح" 
         });
 
     } catch (error) {
-        console.error("Error in Order API:", error);
+        // في حال حدوث أي خطأ، يتم طباعته في سجلات Render
+        console.error("خطأ في ملف order.js:", error);
         res.status(500).json({ 
             success: false, 
-            error: "فشل في معالجة الطلب",
-            details: error.message 
+            error: "فشل في معالجة الطلب" 
         });
     }
 }
