@@ -1,33 +1,57 @@
+// استيراد الملفات من نفس المجلد (api) باستخدام المسار الصحيح ./
 import telegram from "./telegram.js"; 
 import whatsapp from "./whatsapp.js"; 
 
-// تصدير الدالة كدالة افتراضية لمعالج الطلبات
+/**
+ * دالة معالجة الطلبات (Order Handler)
+ * ملاحظة: تأكد أن ملف server.js يقوم باستيراد هذه الدالة واستخدامها في مسار POST
+ */
 export default async function (req, res) {
+    // طباعة البيانات المستلمة للتأكد منها في سجلات Render
+    console.log("Received new order request:", req.body);
+
     try {
-        // استلام البيانات من جسم الطلب
         const orderData = req.body;
 
-        // تنفيذ إرسال الإشعارات (تأكد أن الدوال داخل الملفات الأخرى مهيأة لاستقبال البيانات)
-        if (typeof telegram === 'function') {
-            await telegram(orderData);
-        }
-        
-        if (typeof whatsapp === 'function') {
-            await whatsapp(orderData);
+        // 1. التحقق من وجود بيانات
+        if (!orderData || Object.keys(orderData).length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "No order data provided"
+            });
         }
 
-        // إرسال رد النجاح
-        res.status(200).json({ 
-            success: true, 
-            message: "Order processed and notifications sent!" 
+        // 2. إرسال إشعار تليجرام (يتم استدعاء الدالة المستوردة من ./telegram.js)
+        try {
+            await telegram(orderData);
+            console.log("Telegram notification sent successfully");
+        } catch (teleErr) {
+            console.error("Failed to send Telegram notification:", teleErr.message);
+            // لا نوقف العملية كاملة إذا فشل التليجرام فقط
+        }
+
+        // 3. إرسال إشعار واتساب (اختياري)
+        try {
+            await whatsapp(orderData);
+            console.log("WhatsApp notification sent successfully");
+        } catch (waErr) {
+            console.error("Failed to send WhatsApp notification:", waErr.message);
+        }
+
+        // 4. إرسال رد النجاح النهائي للمتصفح
+        return res.status(200).json({
+            success: true,
+            message: "🚀 RelaxFix PRO: Order processed and notifications sent!",
+            timestamp: new Date().toISOString()
         });
 
     } catch (error) {
-        console.error("Error in Order API:", error);
-        res.status(500).json({ 
-            success: false, 
+        // في حال حدوث خطأ كارثي في السيرفر
+        console.error("Critical Error in Order API:", error);
+        return res.status(500).json({
+            success: false,
             error: "Internal Server Error",
-            details: error.message 
+            details: error.message
         });
     }
 }
