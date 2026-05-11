@@ -1,20 +1,18 @@
-import { supabase } from "../supabase.js";
+import axios from "axios";
 
-export default async function orders(req, res) {
+const BOT_TOKEN = process.env.BOT_TOKEN;
+const CHAT_ID = process.env.CHAT_ID;
+
+export default async function sendTelegram(message) {
   try {
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .order("id", { ascending: false });
-
-    if (error) {
-      console.error("Supabase Error:", error);
-      return res.status(500).json({ error: "Database error" });
-    }
-
-    res.json(data);
+    await axios.post(
+      `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`,
+      {
+        chat_id: CHAT_ID,
+        text: message
+      }
+    );
   } catch (err) {
-    console.error("Orders API Error:", err);
-    res.status(500).json({ error: "Server error" });
+    console.error("Telegram Error:", err.message);
   }
 }
