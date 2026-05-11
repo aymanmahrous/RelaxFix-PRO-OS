@@ -1,20 +1,15 @@
-import { supabase } from "../supabase.js";
+import telegram from "./telegram.js"; 
+import whatsapp from "./whatsapp.js"; 
 
-export default async function orders(req, res) {
-  try {
-    const { data, error } = await supabase
-      .from("orders")
-      .select("*")
-      .order("id", { ascending: false });
+// تأكد من إضافة النقطة والسلاش (./) قبل اسم الملف
+// وتأكد من وجود الامتداد .js في النهاية
 
-    if (error) {
-      console.error("Supabase Error:", error);
-      return res.status(500).json({ error: "Database error" });
+export default async function (req, res) {
+    try {
+        // منطق جلب الطلبات (Orders) هنا
+        res.status(200).json({ success: true, data: [] });
+    } catch (error) {
+        console.error("Orders Error:", error);
+        res.status(500).json({ success: false, error: error.message });
     }
-
-    res.json(data);
-  } catch (err) {
-    console.error("Orders API Error:", err);
-    res.status(500).json({ error: "Server error" });
-  }
 }
