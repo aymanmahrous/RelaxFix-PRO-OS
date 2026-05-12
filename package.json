@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "express": "latest",
-    "@supabase/supabase-js": "latest",
-    "axios": "latest"
+    "@supabase/supabase-js": "latest"
   }
 }
