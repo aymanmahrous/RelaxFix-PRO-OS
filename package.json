@@ -11,17 +11,3 @@
     "@supabase/supabase-js": "latest"
   }
 }
-{
-  "name": "relaxfix-pro-os",
-  "version": "1.0.0",
-  "type": "module",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "latest",
-    "@supabase/supabase-js": "latest",
-    "axios": "latest" 
-  }
-}
