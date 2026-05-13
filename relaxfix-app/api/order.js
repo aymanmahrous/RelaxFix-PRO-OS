@@ -1,42 +1,33 @@
+import { createClient } from "@supabase/supabase-js";
 import telegram from "./telegram.js";
 import whatsapp from "./whatsapp.js";
 
-/**
- * دالة معالجة الطلبات - تُصدر كدالة افتراضية
- * ليتعرف عليها ملف server.js
- */
+// --- إعدادات Supabase المباشرة ---
+const supabaseUrl = "https://nmzxrjdxvmmzzmajrskm.supabase.co";
+const supabaseKey = "EyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5tenhyamR4dm1tenptYWpyc2ttIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMzI2MzMsImV4cCI6MjA5MjYwODYzM30.v8kU5m9Whp18DqJu7bQWPJFt3GKkgKo0akHo8mp9L4c";
+
+const supabase = createClient(supabaseUrl, supabaseKey);
+
 export default async function (req, res) {
     try {
-        // استلام البيانات من الطلب (Body)
         const orderData = req.body;
 
-        // التحقق من وجود بيانات
-        if (!orderData || Object.keys(orderData).length === 0) {
-            return res.status(400).json({ 
-                success: false, 
-                message: "No data received" 
-            });
-        }
+        // 1. إرسال الإشعارات
+        if (telegram) await telegram(orderData);
+        if (whatsapp) await whatsapp(orderData);
 
-        // 1. إرسال إشعار التليجرام
-        await telegram(orderData);
+        // 2. تخزين الطلب في قاعدة البيانات
+        const { data, error } = await supabase
+            .from("orders")
+            .insert([orderData]);
 
-        // 2. إرسال إشعار الواتساب
-        await whatsapp(orderData);
+        if (error) throw error;
 
-        // 3. الرد بالنجاح
-        console.log("✅ Order processed successfully");
-        res.status(200).json({ 
-            success: true, 
-            message: "Order placed and notifications sent!" 
-        });
+        console.log("✅ Order saved and notifications sent!");
+        res.status(200).json({ success: true, message: "Order processed successfully!" });
 
     } catch (error) {
-        // في حال حدوث أي خطأ، نطبعه في سجلات Render ونرسل استجابة بالخطأ
-        console.error("❌ API Error:", error.message);
-        res.status(500).json({ 
-            success: false, 
-            error: error.message 
-        });
+        console.error("❌ Error:", error.message);
+        res.status(500).json({ success: false, error: error.message });
     }
 }
