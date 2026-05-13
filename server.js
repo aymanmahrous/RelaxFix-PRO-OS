@@ -9,7 +9,7 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// إعدادات السيرفر الأساسية
+// إعدادات السيرفر
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "relaxfix-app")));
 
@@ -18,9 +18,9 @@ app.post("/api/order", order);
 app.get("/api/orders", orders);
 app.post("/api/update", update);
 
-// إعدادات المنفذ والمضيف ليتوافق مع Render لعام 2026
+// إعدادات Render لعام 2026
 const PORT = process.env.PORT || 10000;
-const HOST = '0.0.0.0'; // هام جداً لإنهاء خطأ 502
+const HOST = '0.0.0.0';
 
 app.listen(PORT, HOST, () => {
     console.log(`🚀 RelaxFix PRO OS is firing up on port ${PORT}`);
