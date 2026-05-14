@@ -2,30 +2,29 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import { createClient } from "@supabase/supabase-js";
-import orderRoutes from "./relaxfix-app/api/order.js";
-import webhookHandler from "./webhooks/webhookHandler.js";
+
+// إعداد المسارات الأساسية
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-// إعدادات البيئة
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
-
 app.use(express.json());
+
+// تأكد من أن هذا المسار يطابق تماماً اسم المجلدات في GitHub
+// إذا كان المجلد يبدأ بحرف كبير، يجب كتابته كبيراً
+import orderRoutes from "./relaxfix-app/api/order.js";
+
+// ربط الملفات الثابتة (الموقع نفسه)
 app.use(express.static(path.join(__dirname, "relaxfix-app")));
 
-// --- المسارات المدمجة ---
+// --- المسارات ---
 app.post("/api/order", orderRoutes);
-app.post("/api/webhooks/stripe", webhookHandler); // مسار Stripe الجديد
 
-// مسار تسجيل الفنيين (Recruitment) المستوحى من وثائقك
-app.post("/api/technicians/apply", async (req, res) => {
-    const { data, error } = await supabase.from('technician_profiles').insert([req.body]);
-    if (error) return res.status(500).json({ error: error.message });
-    res.json({ success: true, message: "Application Received" });
-});
+// مسار تجريبي للتأكد من عمل السيرفر
+app.get("/health", (req, res) => res.send("Server is Healthy! ✅"));
 
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 RelaxFix PRO OS Live on Port ${PORT}`);
+    console.log(`🚀 RelaxFix PRO OS is firing up on port ${PORT}`);
+    console.log(`🌐 Everything is ready!`);
 });
