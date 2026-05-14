@@ -1,26 +1,26 @@
-import express from "express";
-import path from "path";
-import { fileURLToPath } from "url";
-import order from "./relaxfix-app/api/order.js";
-import webhookHandler from "./api/webhookHandler.js"; // الخدمة الجديدة
+// 1. استيراد المكتبات الأساسية
+import express from 'express';
+import stripe from 'stripe';
+// 2. تصحيح استيراد الملف المحلي (تأكد من إضافة .js في النهاية)
+// هذا هو الحل المباشر للخطأ في الصور السابقة
+import { handleWebhook } from './api/webhookHandler.js'; 
 
 const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const port = process.env.PORT || 10000; // المنفذ الافتراضي لـ Render
 
+// إعدادات الخادم لرفع كفاءة الاتصال كما في image_6.png
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "relaxfix-app")));
 
-// المسارات الحالية والمدمجة
-app.post("/api/order", order);
-app.post("/api/stripe-webhook", webhookHandler); // ربط نظام الدفع
-
-// مسار رصيد العملات (Credits)
-app.get("/api/wallet/balance", async (req, res) => {
-    // كود جلب الرصيد من Supabase
+// مسار افتراضي للتأكد من عمل الخادم
+app.get('/', (req, res) => {
+  res.send('الخادم يعمل بنجاح!');
 });
 
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Relax Fix Studio is Live on port ${PORT}`);
+// تشغيل الخادم
+const server = app.listen(port, '0.0.0.0', () => {
+  console.log(`Server is running on port ${port}`);
 });
+
+// حل مشكلة التوقف المفاجئ (Timeouts) المذكورة في image_6.png
+server.keepAliveTimeout = 120000;
+server.headersTimeout = 120000;
