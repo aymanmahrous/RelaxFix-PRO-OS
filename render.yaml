@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: Relax
+    env: node
+    plan: free # يمكنك تغييرها إلى standard إذا كنت تستخدم خطة مدفوعة
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 18.0.0 # أو الإصدار الذي تفضله
+      - key: PORT
+        value: 3000
