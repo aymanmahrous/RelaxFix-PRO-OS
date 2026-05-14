@@ -2,24 +2,31 @@ import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
 import order from "./relaxfix-app/api/order.js";
-import webhookHandler from "./api/webhookHandler.js";
-import routers from "./server/routers.js";
+import orders from "./relaxfix-app/api/orders.js";
+import update from "./relaxfix-app/api/update.js";
+import routers from "./server/routers.js"; // المسار الجديد الذي أضفناه للدمج
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// هام: Stripe يحتاج الوصول لبيانات الـ raw body في مسار الـ Webhook
-app.use("/api/webhook", express.raw({ type: 'application/json' }));
+// إعدادات السيرفر الأساسية
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "relaxfix-app")));
 
-// ربط المسارات
-app.use("/api/v1", routers);
+// ربط المسارات الحيوية (API)
 app.post("/api/order", order);
-app.post("/api/webhook", webhookHandler);
+app.get("/api/orders", orders);
+app.post("/api/update", update);
 
+// دمج المسارات الجديدة المتقدمة (الاشتراكات والفواتير)
+app.use("/api/system", routers);
+
+// إعدادات المنفذ والمضيف ليتوافق مع Render لعام 2026
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 RelaxFix PRO OS is live on port ${PORT}`);
+const HOST = '0.0.0.0'; 
+
+app.listen(PORT, HOST, () => {
+    console.log(`🚀 RelaxFix PRO OS is firing up on port ${PORT}`);
+    console.log(`🌐 System is live and ready for orders!`);
 });
