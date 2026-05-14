@@ -1,32 +1,31 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import order from "./relaxfix-app/api/order.js";
-import orders from "./relaxfix-app/api/orders.js";
-import update from "./relaxfix-app/api/update.js";
-import routers from "./server/routers.js"; // المسار الجديد الذي أضفناه للدمج
+import { createClient } from "@supabase/supabase-js";
+import orderRoutes from "./relaxfix-app/api/order.js";
+import webhookHandler from "./webhooks/webhookHandler.js";
 
 const app = express();
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// إعدادات السيرفر الأساسية
+// إعدادات البيئة
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "relaxfix-app")));
 
-// ربط المسارات الحيوية (API)
-app.post("/api/order", order);
-app.get("/api/orders", orders);
-app.post("/api/update", update);
+// --- المسارات المدمجة ---
+app.post("/api/order", orderRoutes);
+app.post("/api/webhooks/stripe", webhookHandler); // مسار Stripe الجديد
 
-// دمج المسارات الجديدة المتقدمة (الاشتراكات والفواتير)
-app.use("/api/system", routers);
+// مسار تسجيل الفنيين (Recruitment) المستوحى من وثائقك
+app.post("/api/technicians/apply", async (req, res) => {
+    const { data, error } = await supabase.from('technician_profiles').insert([req.body]);
+    if (error) return res.status(500).json({ error: error.message });
+    res.json({ success: true, message: "Application Received" });
+});
 
-// إعدادات المنفذ والمضيف ليتوافق مع Render لعام 2026
 const PORT = process.env.PORT || 10000;
-const HOST = '0.0.0.0'; 
-
-app.listen(PORT, HOST, () => {
-    console.log(`🚀 RelaxFix PRO OS is firing up on port ${PORT}`);
-    console.log(`🌐 System is live and ready for orders!`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 RelaxFix PRO OS Live on Port ${PORT}`);
 });
