@@ -4,34 +4,35 @@ import axios from "axios";
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
-    const sig = req.headers['stripe-signature'];
-    const event = req.body; // في الإنتاج استخدم rawBody للتحقق من التوقيع
+    const event = req.body;
 
     try {
+        // عند نجاح عملية الدفع
         if (event.type === 'checkout.session.completed') {
             const session = event.data.object;
             const userId = session.client_reference_id;
             const amount = session.amount_total / 100;
 
-            // 1. تحديث حالة الفاتورة في Supabase
-            await supabase
-                .from('invoices')
-                .insert([{ user_id: userId, amount: amount, status: 'paid', stripe_payment_id: session.id }]);
+            // 1. إضافة الفاتورة
+            await supabase.from('invoices').insert([{ 
+                user_id: userId, amount: amount, status: 'paid' 
+            }]);
 
-            // 2. تحديث رصيد العملات (Credits) للمستخدم
-            // لنفترض أن كل دولار يعطي 10 عملات
+            // 2. تحديث الرصيد (كل 1 درهم = 10 عملات)
             const creditsToAdd = Math.floor(amount * 10);
-            await supabase.rpc('increment_wallet_balance', { user_id_input: userId, credits: creditsToAdd });
+            const { data: wallet } = await supabase.from('user_wallets').select('balance_credits').eq('user_id', userId).single();
+            await supabase.from('user_wallets').update({ 
+                balance_credits: (wallet?.balance_credits || 0) + creditsToAdd 
+            }).eq('user_id', userId);
 
-            // 3. إرسال إشعار تليجرام
-            const message = `💰 تم استلام دفع جديد!\nالعميل: ${userId}\nالمبلغ: ${amount} AED\nالعملات المضافة: ${creditsToAdd}`;
+            // 3. إشعار تليجرام
             await axios.post(`https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}/sendMessage`, {
                 chat_id: process.env.TELEGRAM_CHAT_ID,
-                text: message
+                text: `💰 دفع ناجح!\nالمبلغ: ${amount} AED\nتم إضافة ${creditsToAdd} عملة للمستخدم: ${userId}`
             });
         }
-        res.json({ received: true });
+        res.json({ success: true });
     } catch (err) {
-        res.status(400).send(`Webhook Error: ${err.message}`);
+        res.status(400).send(`Error: ${err.message}`);
     }
 }
