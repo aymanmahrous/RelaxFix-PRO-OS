@@ -35,3 +35,4 @@ const server = app.listen(PORT, '0.0.0.0', () => {
 // تم ضبط الوقت على 120 ثانية (120000 مللي ثانية)
 server.keepAliveTimeout = 120000; 
 server.headersTimeout = 120000;
+ 
