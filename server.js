@@ -24,3 +24,4 @@ const server = app.listen(port, '0.0.0.0', () => {
 // حل مشكلة التوقف المفاجئ (Timeouts) المذكورة في image_6.png
 server.keepAliveTimeout = 120000;
 server.headersTimeout = 120000;
+ 
