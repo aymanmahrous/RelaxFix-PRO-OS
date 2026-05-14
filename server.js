@@ -1,27 +1,26 @@
-// 1. استيراد المكتبات الأساسية
-import express from 'express';
-import stripe from 'stripe';
-// 2. تصحيح استيراد الملف المحلي (تأكد من إضافة .js في النهاية)
-// هذا هو الحل المباشر للخطأ في الصور السابقة
-import { handleWebhook } from './api/webhookHandler.js'; 
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// الحل: التأكد من المسار الصحيح للملفات المحلية
+// بما أن الملفات داخل مجلد api، نستخدم المسار النسبي المباشر
+import order from "./api/order.js";
+import webhookHandler from "./api/webhookHandler.js";
 
 const app = express();
-const port = process.env.PORT || 10000; // المنفذ الافتراضي لـ Render
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// إعدادات الخادم لرفع كفاءة الاتصال كما في image_6.png
+// إعدادات قراءة البيانات والملفات الثابتة
 app.use(express.json());
+// تأكد أن المجلد المرفوع لـ GitHub يحتوي على الملفات مباشرة أو عدل المسار هنا
+app.use(express.static(path.join(__dirname, "public"))); 
 
-// مسار افتراضي للتأكد من عمل الخادم
-app.get('/', (req, res) => {
-  res.send('الخادم يعمل بنجاح!');
+// المسارات (Routes)
+app.post("/api/order", order);
+app.post("/api/stripe-webhook", webhookHandler);
+
+const PORT = process.env.PORT || 10000;
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Relax Fix Studio is Live on port ${PORT}`);
 });
-
-// تشغيل الخادم
-const server = app.listen(port, '0.0.0.0', () => {
-  console.log(`Server is running on port ${port}`);
-});
-
-// حل مشكلة التوقف المفاجئ (Timeouts) المذكورة في image_6.png
-server.keepAliveTimeout = 120000;
-server.headersTimeout = 120000;
- 
