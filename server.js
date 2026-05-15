@@ -12,33 +12,36 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// حل ذكي لقراءة ملف order.js من الهاتف وتفادي خطأ الحروف تماماً
+// --- استيراد ذكي لملف order.js لتجنب خطأ المسارات تماماً ---
 let orderRouter;
-const apiDirPath = path.join(__dirname, "api");
 
-try {
-    const files = fs.readdirSync(apiDirPath);
-    const targetFile = files.find(f => f.toLowerCase() === "order.js");
-
-    if (targetFile) {
-        const modulePath = `./api/${targetFile}`;
-        const importedModule = await import(modulePath);
-        orderRouter = importedModule.default || importedModule;
-        
-        app.use('/api', orderRouter);
-        console.log(`[Success] Loaded order module: ${targetFile}`);
-    } else {
-        console.error("[Error] order.js not found in api folder.");
-    }
-} catch (error) {
-    console.error("[Error] Dynamic import failed:", error.message);
+// 1. التحقق أولاً إذا كان الملف في المجلد الرئيسي مباشرة (وهو الأرجح حالياً)
+if (fs.existsSync(path.join(__dirname, "order.js"))) {
+    const module = await import("./order.js");
+    orderRouter = module.default || module;
+    console.log("-> [SUCCESS] Loaded order.js from Root directory");
+} 
+// 2. التحقق كخيار احتياطي إذا كان داخل مجلد api
+else if (fs.existsSync(path.join(__dirname, "api", "order.js"))) {
+    const module = await import("./api/order.js");
+    orderRouter = module.default || module;
+    console.log("-> [SUCCESS] Loaded order.js from api directory");
+} else {
+    console.error("-> [CRITICAL ERROR] order.js file could not be found in Root or API folder!");
 }
+
+// ربط المسارات بالـ Express في حال تم العثور على الملف بنجاح
+if (orderRouter) {
+    app.use('/api', orderRouter);
+}
+// -----------------------------------------------------------
 
 const PORT = process.env.PORT || 3000; 
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running successfully on port ${PORT}`);
 });
 
+// إعدادات التوقيت لضمان استقرار اتصالات الـ Webhooks ومنع قطعها في Render
 server.keepAliveTimeout = 120000;
 server.headersTimeout = 120000;
