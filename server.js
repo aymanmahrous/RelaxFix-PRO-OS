@@ -1,33 +1,48 @@
-// 1. استيراد المكتبات الأساسية اللازمة لتشغيل الخادم والتعامل مع المسارات
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import fs from "fs";
 
-// إعداد المسارات للعمل مع ES Modules
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// 2. استيراد ملفات المنطق البرمجي (الطلبات والـ Webhooks)
-// ملاحظة: الامتداد .js ضروري جداً هنا لأنك تستخدم "type": "module"
-import order from "./api/order.js";
-
 const app = express();
 
-// إعدادات Middleware الأساسية
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // تأكد من وجود مجلد public إذا كان لديك ملفات ثابتة
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-// استخدام المسارات المستوردة
-app.use('/api', order);
+// --- حل مشكلة مسار ملف order.js ديناميكياً لتجنب خطأ الحروف الكبيرة والصغيرة ---
+let orderRouter;
+const apiDirPath = path.join(__dirname, "api");
 
-// منفذ التشغيل (Port) - Render يستخدم غالباً المتغير PORT تلقائياً
+try {
+    // قراءة محتويات مجلد api للبحث عن الملف الفعلي المرفوع
+    const files = fs.readdirSync(apiDirPath);
+    const targetFile = files.find(f => f.toLowerCase() === "order.js");
+
+    if (targetFile) {
+        // استيراد الملف ديناميكياً بناءً على اسمه الحقيقي في المجلد
+        const modulePath = `./api/${targetFile}`;
+        const importedModule = await import(modulePath);
+        orderRouter = importedModule.default || importedModule;
+        
+        // ربط المسار بالـ Express
+        app.use('/api', orderRouter);
+        console.log(`[Success] Loaded order module from: ${targetFile}`);
+    } else {
+        console.error("[Error] Could not find any order.js file in 'api' folder.");
+    }
+} catch (error) {
+    console.error("[Error] Failed to load api directory dynamically:", error.message);
+}
+// -------------------------------------------------------------------------
+
 const PORT = process.env.PORT || 3000; 
 
 const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running successfully on port ${PORT}`);
 });
 
-// ضبط وقت الاستجابة لضمان عدم انقطاع الاتصال في Render
-// تم ضبط الوقت على 120 ثانية (120000 مللي ثانية)
 server.keepAliveTimeout = 120000;
 server.headersTimeout = 120000;
