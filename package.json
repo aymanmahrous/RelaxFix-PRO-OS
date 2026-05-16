@@ -1,18 +1,33 @@
 {
   "name": "relaxfix-pro-os",
-  "version": "1.0.0",
+  "version": "1.0.1",
+  "description": "RelaxFix PRO OS - Service Management System",
   "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "NODE_ENV=development node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "express": "latest",
-    "@supabase/supabase-js": "latest",
-    "axios": "latest",
-    "stripe": "latest"
+    "express": "^4.18.2",
+    "@supabase/supabase-js": "^2.38.0",
+    "axios": "^1.6.0",
+    "stripe": "^13.0.0",
+    "bcrypt": "^5.1.1"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
   },
   "engines": {
-    "node": "18.x"
-  }
+    "node": ">=18.0.0"
+  },
+  "keywords": [
+    "relaxfix",
+    "service",
+    "management",
+    "orders"
+  ],
+  "author": "Ayman Mahrous",
+  "license": "MIT"
 }
