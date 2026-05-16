@@ -1,12 +1,23 @@
 import axios from "axios";
 
-const WHATSAPP_NUMBER = "00971588259848";
+const WHATSAPP_ADMIN = process.env.WHATSAPP_ADMIN || "+971588259848";
 
 export default async function sendWhatsApp(message) {
-  try {
-    console.log("WhatsApp Message Sent To:", WHATSAPP_NUMBER);
-    console.log("Message:", message);
-  } catch (err) {
-    console.error("WhatsApp Error:", err.message);
-  }
+    try {
+        // Note: This is a placeholder implementation
+        // For production, integrate with WhatsApp Business API
+        // Current implementation just logs the message
+        
+        console.log("📱 WhatsApp Message Queued To:", WHATSAPP_ADMIN);
+        console.log("📝 Message:", message);
+        
+        // TODO: Integrate with WhatsApp Business API
+        // Example with Twilio or similar service:
+        // await axios.post('https://api.whatsapp.com/send', { ... })
+        
+        return { success: true, message: 'Message queued' };
+    } catch (err) {
+        console.error("❌ WhatsApp Error:", err.message);
+        return { success: false, error: err.message };
+    }
 }
