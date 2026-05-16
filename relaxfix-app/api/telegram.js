@@ -1,27 +1,14 @@
-import axios from "axios";
+import telegram from "./telegram.js"; 
+import whatsapp from "./whatsapp.js"; 
 
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID;
-
-const sendTelegramNotification = async (message) => {
-    if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
-        console.warn('Telegram credentials not configured');
-        return;
-    }
-
+export default async function orderHandler(req, res) {
     try {
-        await axios.post(
-            `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`,
-            {
-                chat_id: TELEGRAM_CHAT_ID,
-                text: message,
-                parse_mode: 'HTML'
-            }
-        );
-        console.log('✅ Telegram notification sent');
+        const orderData = req.body;
+        await telegram(orderData);
+        // await whatsapp(orderData); // فعلها إذا كان الملف جاهزاً
+        res.status(200).json({ success: true });
     } catch (error) {
-        console.error('❌ Telegram Error:', error.message);
+        console.error("Internal Error:", error);
+        res.status(500).json({ success: false, message: error.message });
     }
-};
-
-export default sendTelegramNotification;
+}

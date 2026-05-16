@@ -4,90 +4,31 @@
 <meta charset="UTF-8">
 <title>تسجيل الدخول</title>
 <link rel="stylesheet" href="admin.css">
-<style>
-    .error { color: #dc3545; font-size: 12px; margin-top: 5px; }
-    .loading { opacity: 0.6; pointer-events: none; }
-</style>
 </head>
 <body>
 
 <div class="container">
-    <h2>تسجيل الدخول - RelaxFix PRO OS</h2>
+    <h2>تسجيل الدخول</h2>
 
-    <form id="loginForm" onsubmit="handleLogin(event)">
-        <div>
-            <input 
-                id="user" 
-                type="text"
-                placeholder="اسم المستخدم" 
-                required
-                autocomplete="username"
-            >
-        </div>
-        <div>
-            <input 
-                id="pass" 
-                type="password" 
-                placeholder="كلمة المرور" 
-                required
-                autocomplete="current-password"
-            >
-        </div>
-        <button type="submit" id="loginBtn">دخول</button>
-        <p id="msg" class="error"></p>
-    </form>
+    <input id="user" placeholder="اسم المستخدم">
+    <input id="pass" type="password" placeholder="كلمة المرور">
+
+    <button onclick="login()">دخول</button>
+
+    <p id="msg"></p>
 </div>
 
 <script>
-const handleLogin = async (event) => {
-    event.preventDefault();
-    
-    const username = document.getElementById("user").value.trim();
-    const password = document.getElementById("pass").value;
-    const msgElement = document.getElementById("msg");
-    const loginBtn = document.getElementById("loginBtn");
+function login() {
+    const u = document.getElementById("user").value;
+    const p = document.getElementById("pass").value;
 
-    // Clear previous message
-    msgElement.textContent = "";
-
-    // Client-side validation
-    if (!username || !password) {
-        msgElement.textContent = "يرجى ملء جميع الحقول";
-        return;
+    if (u === "admin" && p === "1234") {
+        location.href = "dashboard.html";
+    } else {
+        document.getElementById("msg").innerText = "خطأ في تسجيل الدخول";
     }
-
-    // Disable button to prevent multiple submissions
-    loginBtn.disabled = true;
-    loginBtn.classList.add("loading");
-
-    try {
-        // Send login request to server
-        const response = await fetch("/api/auth/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ username, password })
-        });
-
-        const data = await response.json();
-
-        if (response.ok && data.success) {
-            // Store auth token
-            localStorage.setItem("authToken", data.token);
-            // Redirect to dashboard
-            window.location.href = "/dashboard.html";
-        } else {
-            msgElement.textContent = data.error || "فشل تسجيل الدخول. تحقق من بيانات الدخول";
-        }
-    } catch (error) {
-        console.error("Login error:", error);
-        msgElement.textContent = "حدث خطأ في الاتصال بالخادم";
-    } finally {
-        loginBtn.disabled = false;
-        loginBtn.classList.remove("loading");
-    }
-};
+}
 </script>
 
 </body>
