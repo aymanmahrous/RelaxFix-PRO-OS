@@ -1,5 +1,15 @@
 services:
   - type: web
+      name: relaxfix-2026
+          runtime: node
+              buildCommand: npm install
+                  startCommand: npm start
+                      envVars:
+                            - key: PORT
+                                    value: "3000"
+                                          - key: NODE_ENV
+                                                  value: productionservices:
+  - type: web
     name: relaxfix-2026
     runtime: node
     buildCommand: npm install
