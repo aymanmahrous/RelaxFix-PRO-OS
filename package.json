@@ -1,18 +1,14 @@
 {
-  "name": "relaxfix-pro-os",
+  "name": "relaxfix-real-saas",
   "version": "1.0.0",
-  "type": "module",
-  "main": "server.js",
+  "main": "relaxfix-premium.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node relaxfix-premium.js"
   },
   "dependencies": {
-    "express": "latest",
-    "@supabase/supabase-js": "latest",
-    "axios": "latest",
-    "stripe": "latest"
+    "@supabase/supabase-js": "^2.49.1"
   },
   "engines": {
-    "node": "18.x"
+    "node": ">=18"
   }
 }
